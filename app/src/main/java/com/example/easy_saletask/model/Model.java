@@ -42,30 +42,32 @@ public class Model {
     }
 
     private void fetchUsers(int page) {
-        if (userDao.getUsersCount() == 0) {
-            service.getUsersData(page).enqueue(new Callback<UsersData>() {
-                @Override
-                public void onResponse(@NonNull Call<UsersData> call, @NonNull Response<UsersData> response) {
-                    data = response.body();
-                    if (data != null && data.getData() != null) {
-                        userDao.insertAll(data.getData());
 
-                        if (data.getPage() < data.getTotal_pages()) {
-                            fetchUsers(page + 1);
-                        }
+        service.getUsersData(page).enqueue(new Callback<UsersData>() {
+            @Override
+            public void onResponse(@NonNull Call<UsersData> call, @NonNull Response<UsersData> response) {
+                data = response.body();
+                if (data != null && data.getData() != null) {
+                    userDao.insertAll(data.getData());
+
+                    if (data.getPage() < data.getTotal_pages()) {
+                        fetchUsers(page + 1);
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<UsersData> call, @NonNull Throwable throwable) {
-                    Log.d("ERROR", Objects.requireNonNull(throwable.getMessage()));
-                }
-            });
-        }
+            @Override
+            public void onFailure(@NonNull Call<UsersData> call, @NonNull Throwable throwable) {
+                Log.d("ERROR", Objects.requireNonNull(throwable.getMessage()));
+            }
+        });
+
     }
 
     public void fetchAllUsers() {
-        fetchUsers(1);
+        if (userDao.getUsersCount() == 0) {
+            fetchUsers(1);
+        }
     }
 
     public List<User> getUsersList() {
