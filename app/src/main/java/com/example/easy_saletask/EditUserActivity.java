@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +24,7 @@ public class EditUserActivity extends AppCompatActivity {
     Button saveBtn;
     int position;
     int id;
+    TextView tvError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +42,22 @@ public class EditUserActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         avatarInput = findViewById(R.id.avatarInput);
         saveBtn = findViewById(R.id.saveBtn);
+        tvError = findViewById(R.id.errorTextView);
 
         setInputsText();
 
         saveBtn.setOnClickListener(view -> {
-            updateUser(
-                    position,
-                    firstNameInput.getText().toString(),
-                    lastNameInput.getText().toString(),
-                    emailInput.getText().toString(),
-                    avatarInput.getText().toString(),
-                    id);
+            if (checkAllFieldsAreFilled()) {
+                updateUser(
+                        position,
+                        firstNameInput.getText().toString(),
+                        lastNameInput.getText().toString(),
+                        emailInput.getText().toString(),
+                        avatarInput.getText().toString(),
+                        id);
+            } else {
+                tvError.setText("Please fill all of the fields.");
+            }
         });
     }
 
@@ -59,17 +66,24 @@ public class EditUserActivity extends AppCompatActivity {
         lastNameInput.setText(getIntent().getStringExtra("LAST-NAME"));
         emailInput.setText(getIntent().getStringExtra("EMAIL"));
         avatarInput.setText(getIntent().getStringExtra("AVATAR"));
-        position = getIntent().getIntExtra("POS",0);
-        id = getIntent().getIntExtra("ID",0);
+        position = getIntent().getIntExtra("POS", 0);
+        id = getIntent().getIntExtra("ID", 0);
     }
 
     private void updateUser(int position, String firstName, String lastName,
                             String email, String avatar, int id) {
         ViewModel viewModel = ViewModel.getInstance();
-        viewModel.updateUser(position,firstName,lastName,email,avatar, id);
+        viewModel.updateUser(position, firstName, lastName, email, avatar, id);
 
         Intent resultIntent = new Intent();
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
+    }
+
+    private boolean checkAllFieldsAreFilled() {
+        return !firstNameInput.getText().toString().isEmpty() &&
+                !lastNameInput.getText().toString().isEmpty() &&
+                !emailInput.getText().toString().isEmpty() &&
+                !avatarInput.getText().toString().isEmpty();
     }
 }
